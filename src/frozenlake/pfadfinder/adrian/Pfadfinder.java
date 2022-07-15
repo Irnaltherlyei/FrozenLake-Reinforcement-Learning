@@ -15,14 +15,11 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 		return "adrian";
 	}
 
-	// Doesn't work because no equal method exists for class Koordinate
-	private final Map<Koordinate, Double> valueFunction = new LinkedHashMap<>();
-	private final Map<String, Double> valueFunctionString = new LinkedHashMap<>();
+	private final Map<String, Double> valueFunction = new LinkedHashMap<>();
 	private final Map<String, Richtung> policy = new LinkedHashMap<>();
 
-
-	private final Double GAMMA = 0.9; // Diminish
-	private final Double EPSILON= 0.005; // Threshold
+	public final Double GAMMA = 0.9; // Diminish
+	public final Double EPSILON= 0.005; // Threshold
 
 	@Override
 	public boolean lerneSee(See see, boolean stateValue, boolean neuronalesNetz, boolean onPolicy) {
@@ -36,15 +33,6 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 			}
 		}
 
-		// Initial actions at each state
-		Map<String, ArrayList<Richtung>> possibleActions = new LinkedHashMap<>();
-		for (Koordinate state :
-				states) {
-			String koordinate = String.valueOf(state.getZeile()) + state.getSpalte();
-
-			possibleActions.put(koordinate, getPossibleActions(state, size));
-		}
-
 		Random random = new Random();
 
 		// Initial policy
@@ -52,7 +40,7 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 				states) {
 			String koordinate = String.valueOf(state.getZeile()) + state.getSpalte();
 
-			ArrayList<Richtung> actions = possibleActions.get(koordinate);
+			ArrayList<Richtung> actions = getPossibleActions(state, size);
 			int rnd = random.nextInt(actions.size());
 
 			policy.put(koordinate,  actions.get(rnd));
@@ -65,16 +53,12 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 
 			double rewardFinalState = getReward(see, state);
 
-			//valueFunction.put(state, 0.0);
-			valueFunctionString.put(koordinate, rewardFinalState);
+			valueFunction.put(koordinate, rewardFinalState);
 		}
 
-		System.out.println(states.size() + " possible states:\n" + states);
-		System.out.println("Possible actions for each state:\n" + possibleActions);
-		System.out.println("Initial policy for each state:\n" + policy);
-		//System.out.println("Initial valueFunction:\n" + valueFunction);
-		System.out.println("Initial valueFunctionString with " + valueFunctionString.size() + " values:\n" + valueFunctionString);
-		System.out.println();
+		System.out.println(states.size() + " possible states:\n" + states + "\n");
+		System.out.println("Initial policy for each state:\n" + policy + "\n");
+		System.out.println("Initial valueFunction with " + valueFunction.size() + " values:\n" + valueFunction + "\n");
 
 		int iteration = 0;
 		while (true){
@@ -88,16 +72,14 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 					continue;
 				}
 
-				//double oldValue = valueFunction.get(state);
-				double oldValue = valueFunctionString.get(String.valueOf(state.getZeile()) + state.getSpalte());
+				double oldValue = valueFunction.get(String.valueOf(state.getZeile()) + state.getSpalte());
 				double newValue = 0;
 
 				for (Richtung action :
-						possibleActions.get(koordinate)) {
+						getPossibleActions(state, size)) {
 					Koordinate stateAfterAction = new Koordinate(state.getZeile() + action.deltaZ(),state.getSpalte() + action.deltaS());
 
-					//double value = getReward(see, state) + GAMMA * valueFunction.get(stateAfterAction);
-					double value = getReward(see, state) + GAMMA * valueFunctionString.get(String.valueOf(stateAfterAction.getZeile()) + stateAfterAction.getSpalte());
+					double value = getReward(see, state) + GAMMA * valueFunction.get(String.valueOf(stateAfterAction.getZeile()) + stateAfterAction.getSpalte());
 
 					if(value > newValue){
 						newValue = value;
@@ -106,8 +88,7 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 					}
 				}
 
-				//valueFunction.put(state, newValue);
-				valueFunctionString.put(String.valueOf(state.getZeile()) + state.getSpalte(), newValue);
+				valueFunction.put(String.valueOf(state.getZeile()) + state.getSpalte(), newValue);
 				change = Math.max(change, Math.abs(oldValue - newValue));
 			}
 
@@ -117,14 +98,10 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 			iteration++;
 		}
 
-		//System.out.println(valueFunction);
-		System.out.println("Convergence after " + iteration + " iterations.");
-		System.out.println("Finished valueFunctionString with " + valueFunctionString.size() + " values:\n" + valueFunctionString);
-		System.out.println();
+		System.out.println("Convergence after " + iteration + " iterations.\n");
+		System.out.println("Finished valueFunction with " + valueFunction.size() + " values:\n" + valueFunction + "\n");
 		printFancyValueFunction(size);
-		System.out.println();
 		printFancyPolicy(size);
-		System.out.println();
 
 		return true;
 	}
@@ -141,25 +118,7 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 
 	@Override
 	public Richtung naechsterSchritt(Zustand ausgangszustand) {
-//		ArrayList<Richtung> possibleActions = getPossibleActions(playerPosition, size);
-//
-		Richtung bestAction =  null;
-//		double highestValue = Double.NEGATIVE_INFINITY;
-//
-//		for (Richtung action :
-//				possibleActions) {
-//			Koordinate positionAfterAction = new Koordinate(playerPosition.getZeile() + action.deltaZ(), playerPosition.getSpalte() + action.deltaS());
-//
-//			String koordinateToString = String.valueOf(positionAfterAction.getZeile()) + positionAfterAction.getSpalte();
-//
-//			if(valueFunctionString.containsKey(koordinateToString)){
-//				double value = valueFunctionString.get(koordinateToString);
-//
-//				if(value > highestValue){
-//					bestAction = action;
-//				}
-//			}
-//		}
+		Richtung bestAction;
 
 		String koordinate = String.valueOf(playerPosition.getZeile()) + playerPosition.getSpalte();
 
@@ -172,7 +131,7 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 
 	@Override
 	public void versuchZuende(Zustand endzustand) {
-		//TODO Hier sind Sie gefragt
+
 	}
 
 	private boolean inBounds(Koordinate position, Richtung action, int size){
@@ -223,7 +182,7 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 	}
 
 	private void printFancyValueFunction(int size){
-		ArrayList<Double> values = new ArrayList<>(valueFunctionString.values());
+		ArrayList<Double> values = new ArrayList<>(valueFunction.values());
 
 		DecimalFormat num = new DecimalFormat("0.00");
 		num.setPositivePrefix("+");
@@ -238,28 +197,39 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 		}
 	}
 
+	public static final String ANSI_RESET = "\u001B[0m";
+	public static final String ANSI_GREEN_BACKGROUND = "\u001B[42m";
+	public static final String ANSI_WHITE_BACKGROUND = "\u001B[47m";
+	public static final String ANSI_BLUE_BACKGROUND = "\u001B[44m";
+
 	private void printFancyPolicy(int size){
+		ArrayList<String> koordinaten = new ArrayList<>(policy.keySet());
 		ArrayList<Richtung> values = new ArrayList<>(policy.values());
 
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
-				Richtung richtung = values.get(i * size + j % size);
+				int index = i * size + j % size;
 
-				String print = "";
+				String print;
 
-				if(richtung == null){
-					print = "   ";
-				} else {
-					switch (richtung){
-						case HOCH -> print = " U ";
-						case LINKS -> print = " < ";
-						case RECHTS -> print = " > ";
-						case RUNTER -> print = " D ";
-						default -> print = " X ";
-					}
+				Richtung richtung = values.get(index);
+				switch (richtung) {
+					case HOCH -> print = ANSI_WHITE_BACKGROUND + " U ";
+					case LINKS -> print = ANSI_WHITE_BACKGROUND + " < ";
+					case RECHTS -> print = ANSI_WHITE_BACKGROUND + " > ";
+					case RUNTER -> print = ANSI_WHITE_BACKGROUND + " D ";
+					default -> print = " X ";
 				}
 
-				System.out.print(print + "|");
+				if(valueFunction.get(koordinaten.get(index)) == -1){
+					print = ANSI_BLUE_BACKGROUND + "   ";
+				} else if (valueFunction.get(koordinaten.get(index)) == 1) {
+					print = ANSI_GREEN_BACKGROUND + " Z ";
+				} else if (valueFunction.get(koordinaten.get(index)) == 0) {
+					print = ANSI_WHITE_BACKGROUND + "   ";
+				}
+
+				System.out.print(print + ANSI_RESET);
 			}
 			System.out.println();
 		}

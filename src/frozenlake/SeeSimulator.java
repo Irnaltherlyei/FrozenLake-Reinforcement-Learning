@@ -12,7 +12,7 @@ public class SeeSimulator {
 		
 		See testsee = new See("Testsee",10, new Koordinate(0,0), new Koordinate(9,9));
 		testsee.wegErzeugen();
-		testsee.speichereSee("Testsee");
+		//testsee.speichereSee("Testsee");
 
 		//Gespeicherten See verwenden
 		//See testsee = See.ladeSee("C:\\Users\\kamin\\Desktop\\isy-frozenLake\\src\\frozenlake\\pfadfinder\\adrian\\", "see.txt");

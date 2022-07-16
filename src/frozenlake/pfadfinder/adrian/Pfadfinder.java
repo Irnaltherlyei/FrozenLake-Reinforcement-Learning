@@ -18,7 +18,8 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 	private final Map<String, Double> valueFunction = new LinkedHashMap<>();
 	private final Map<String, Richtung> policy = new LinkedHashMap<>();
 
-	public final Double GAMMA = 0.9; // Diminish
+	public final Double GAMMA = 0.99; // Diminish
+	// Mostly needed when transition probability isn't 1. Though here it breaks the loop when nothing got updated.
 	public final Double EPSILON= 0.005; // Threshold
 
 	@Override
@@ -38,7 +39,7 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 		// Initial policy
 		for (Koordinate state :
 				states) {
-			String koordinate = String.valueOf(state.getZeile()) + state.getSpalte();
+			String koordinate = koordinateToString(state);
 
 			ArrayList<Richtung> actions = getPossibleActions(state, size);
 			int rnd = random.nextInt(actions.size());
@@ -49,7 +50,7 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 		// Initial value function
 		for (Koordinate state :
 				states) {
-			String koordinate = String.valueOf(state.getZeile()) + state.getSpalte();
+			String koordinate = koordinateToString(state);
 
 			double rewardFinalState = getReward(see, state);
 
@@ -66,20 +67,22 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 
 			for (Koordinate state :
 					states) {
-				String koordinate = String.valueOf(state.getZeile()) + state.getSpalte();
+				String koordinate = koordinateToString(state);
 
+				// If terminal state
 				if(getReward(see, state) != 0){
 					continue;
 				}
 
-				double oldValue = valueFunction.get(String.valueOf(state.getZeile()) + state.getSpalte());
+				double oldValue = valueFunction.get(koordinate);
+
 				double newValue = 0;
 
 				for (Richtung action :
 						getPossibleActions(state, size)) {
 					Koordinate stateAfterAction = new Koordinate(state.getZeile() + action.deltaZ(),state.getSpalte() + action.deltaS());
 
-					double value = getReward(see, state) + GAMMA * valueFunction.get(String.valueOf(stateAfterAction.getZeile()) + stateAfterAction.getSpalte());
+					double value = getReward(see, state) + GAMMA * valueFunction.get(koordinateToString(stateAfterAction));
 
 					if(value > newValue){
 						newValue = value;
@@ -88,7 +91,7 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 					}
 				}
 
-				valueFunction.put(String.valueOf(state.getZeile()) + state.getSpalte(), newValue);
+				valueFunction.put(koordinate, newValue);
 				change = Math.max(change, Math.abs(oldValue - newValue));
 			}
 
@@ -106,21 +109,19 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 		return true;
 	}
 
-	Koordinate playerPosition;
-	int size;
+	private Koordinate playerPosition;
 
 	@Override
 	public boolean starteUeberquerung(See see, boolean stateValue, boolean neuronalesNetz, boolean onPolicy) {
 		playerPosition = see.spielerPosition();
-		size = see.getGroesse();
-		return false;
+		return true;
 	}
 
 	@Override
 	public Richtung naechsterSchritt(Zustand ausgangszustand) {
 		Richtung bestAction;
 
-		String koordinate = String.valueOf(playerPosition.getZeile()) + playerPosition.getSpalte();
+		String koordinate = koordinateToString(playerPosition);
 
 		bestAction = policy.get(koordinate);
 
@@ -131,7 +132,7 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 
 	@Override
 	public void versuchZuende(Zustand endzustand) {
-
+		// I don't know what to put here
 	}
 
 	private boolean inBounds(Koordinate position, Richtung action, int size){
@@ -178,6 +179,7 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 			return 0.0;
 		}
 
+		System.out.println(see.zustandAn(state));
 		return Double.NEGATIVE_INFINITY;
 	}
 
@@ -233,5 +235,13 @@ public class Pfadfinder implements frozenlake.pfadfinder.IPfadfinder{
 			}
 			System.out.println();
 		}
+	}
+
+	private String koordinateToString(Koordinate koordinate){
+		String s = "";
+		s += koordinate.getZeile();
+		s += ";";
+		s += koordinate.getSpalte();
+		return s;
 	}
 }

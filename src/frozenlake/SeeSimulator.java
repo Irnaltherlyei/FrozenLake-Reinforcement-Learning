@@ -15,10 +15,10 @@ public class SeeSimulator {
 		//testsee.speichereSee("Testsee");
 
 		//Gespeicherten See verwenden
-		//testsee = See.ladeSee("C:\\Users\\kamin\\Desktop\\isy-frozenLake\\src\\frozenlake\\pfadfinder\\adrian\\", "see20k.txt");
+		testsee = See.ladeSee("C:\\Users\\kamin\\Desktop\\isy-frozenLake\\src\\frozenlake\\pfadfinder\\adrian\\", "see06.txt");
 
 		//Trainieren mit StateValue, ohne NN, OffPolicy
-		joe.lerneSee(testsee, true, false, false);
+		joe.lerneSee(testsee, false, false, false);
 		
 		//Testdurchlauf mit dem trainierten IPfadfinder
 		joe.starteUeberquerung(testsee, true, false, false);

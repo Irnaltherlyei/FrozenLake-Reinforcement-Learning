@@ -15,7 +15,7 @@ public class SeeSimulator {
 		//testsee.speichereSee("Testsee");
 
 		//Gespeicherten See verwenden
-		testsee = See.ladeSee("C:\\Users\\kamin\\Desktop\\isy-frozenLake\\src\\frozenlake\\pfadfinder\\adrian\\", "see06.txt");
+		testsee = See.ladeSee("C:\\Users\\kamin\\Desktop\\isy-frozenLake\\src\\frozenlake\\pfadfinder\\adrian\\", "see01.txt");
 
 		//Trainieren mit StateValue, ohne NN, OffPolicy
 		joe.lerneSee(testsee, false, false, false);
